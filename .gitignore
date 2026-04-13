@@ -1,4 +1,5 @@
 /auth.json
+/vendor/*
 /assets/*.sqlite
 /assets/version.data
 /examples/add-ltv.pdf
