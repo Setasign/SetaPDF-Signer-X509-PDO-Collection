@@ -45,7 +45,7 @@ class PdoCollection implements
 
     public function contains(Certificate $certificate): bool
     {
-        $stm = $this->pdo->prepare('SELECT 1 as c FROM certificates WHERE tlVersion = ? AND digest = ?');
+        $stm = $this->pdo->prepare('SELECT 1 FROM certificates WHERE tlVersion = ? AND digest = ?');
         if ($stm->execute([$this->tlVersion, $certificate->getDigest()]) === false) {
             return false;
         }
@@ -175,12 +175,12 @@ class PdoCollection implements
 
     public function count(): int
     {
-        $stm = $this->pdo->prepare('SELECT count(*) as c FROM certificates WHERE tlVersion = ?');
+        $stm = $this->pdo->prepare('SELECT count(*) FROM certificates WHERE tlVersion = ?');
         if ($stm->execute([$this->tlVersion]) === false) {
             return 0;
         }
 
-        return (int)$stm->fetch(\PDO::FETCH_ASSOC)['c'];
+        return (int)$stm->fetchColumn();
     }
 
     public function add(Certificate $certificate)
