@@ -48,14 +48,14 @@ $collector->getTrustedCertificates()->add($collection);
 
 Please note that this class is only an example implementation and we build it in the 
 `setasign\SetaPDF2\Demos\Signer\X509\Collection` namespace to show that it is only a
-demonstration. You should create your own implementation in your own namespace of it.
+demonstration. You should create your own implementation in your own namespace.
 
 ## How to run the examples
 For demonstration purpose we added demos, which rely on an SQLite database.
-You have to execute the script `/examples/create-tbl.php` to create the sqlite
+You have to execute the script `/examples/create-tbl.php` to create the SQLite
 database in the `/assets` folder and import all certificate of the EUTL dump
 into it. The script will also write a timestamp into the file 
-`/assets/version.data` which is later used by all examples as its truse list
+`/assets/version.data` which is later used by all examples as its trust list
 version identification.
 
 Then you can simply execute any other script in the `/examples` folder.
