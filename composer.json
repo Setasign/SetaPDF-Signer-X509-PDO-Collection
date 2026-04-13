@@ -1,0 +1,28 @@
+{
+    "name": "setasign/setapdf-signer-x509-pdo-collection",
+    "description": "A X509\\CollectionInterface implementation that uses PDO under the hood.",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jan Slabon",
+            "email": "jan.slabon@setasign.com"
+        }
+    ],
+    "require": {
+        "setasign/setapdf-signer": "^2.51.0.2285",
+        "php": ">=7.4",
+        "ext-pdo": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "setasign\\SetaPDF2\\Demos\\Signer\\X509\\Collection\\": "src/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://www.setasign.com/downloads/"
+        }
+    ]
+}
