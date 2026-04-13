@@ -46,7 +46,7 @@ $collector->getTrustedCertificates()->add($collection);
 // ...
 ```
 
-Please note that this class is only an example implementation and we build in the 
+Please note that this class is only an example implementation and we build it in the 
 `setasign\SetaPDF2\Demos\Signer\X509\Collection` namespace to show that it is only a
 demonstration. You should create your own implementation in your own namespace of it.
 
