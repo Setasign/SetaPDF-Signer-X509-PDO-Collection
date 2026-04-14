@@ -77,6 +77,8 @@ foreach (PemHelper::extractFromFile('../assets/eutl-2026-02-05.pem') as $key => 
     }
 }
 
+file_put_contents('../assets/version.data', $version);
+
 // remove outdated version
 $collection->removeOtherVersions();
 
@@ -84,7 +86,5 @@ $collection->removeOtherVersions();
 //$now = new DateTime('2002-03-16 17:20:20', new \DateTimeZone('+1'));
 //$validAt = $tmpCollection->findByValidAt($now, new \DateTimeZone('+1'));
 //var_dump($validAt->count());
-
-file_put_contents('../assets/version.data', $version);
 
 var_dump(microtime(true) - $start);
