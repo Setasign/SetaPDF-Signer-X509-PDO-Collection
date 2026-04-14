@@ -16,6 +16,7 @@ class PdoCollection implements
 {
     protected \PDO $pdo;
     protected string $tlVersion;
+    protected array $containsCache = [];
 
     /**
      * @param \PDO $pdo
@@ -45,17 +46,23 @@ class PdoCollection implements
 
     public function contains(Certificate $certificate): bool
     {
+        $digest = $certificate->getDigest();
+        $cacheKey = $digest . '|' . $this->tlVersion;
+        if (isset($this->containsCache[$cacheKey])) {
+            return $this->containsCache[$cacheKey];
+        }
+
         $stm = $this->pdo->prepare('SELECT 1 FROM certificates WHERE tlVersion = ? AND digest = ?');
-        if ($stm->execute([$this->tlVersion, $certificate->getDigest()]) === false) {
+        if ($stm->execute([$this->tlVersion, $digest]) === false) {
             return false;
         }
 
         $found = $stm->fetchColumn();
         if ($found === false) {
-            return false;
+            return $this->containsCache[$cacheKey] = false;
         }
 
-        return (bool)$found;
+        return $this->containsCache[$cacheKey] = (bool)$found;
     }
 
     public function getBySerialNumber($serialNumber): Certificate|false
@@ -220,11 +227,15 @@ class PdoCollection implements
     {
         $this->pdo->prepare('DELETE FROM certificates WHERE tlVersion = ? AND digest = ?')
             ->execute([$certificate->getDigest(), $this->tlVersion]);
+
+        $this->containsCache = [];
     }
 
     public function removeOtherVersions(): void
     {
         $this->pdo->prepare('DELETE FROM certificates WHERE tlVersion != ?')
             ->execute([$this->tlVersion]);
+
+        $this->containsCache = [];
     }
 }
