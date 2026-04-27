@@ -9,7 +9,9 @@ and `X509\Collection\FindByKeyHashInterface`.
 This implementation shows how you can use a database as a source of e.g. trusted certificates
 for the `ValidationRelatedInfo\Collector` class.
 
-For testing we use a snapshop of the EUTL (created by [tl-create](https://github.com/PeculiarVentures/tl-create)).
+For testing we use the certificate of the EUTL and AATL. The trust lists are resolved by
+the [`setasign/trust-list-fetcher`](https://packagist.org/packages/setasign/trust-list-fetcher) project.
+
 Please make sure, that you implement your own update mechanism to keep the list up-to-date!
 
 ## The database table structure
@@ -53,7 +55,7 @@ demonstration. You should create your own implementation in your own namespace.
 ## How to run the examples
 For demonstration purpose we added demos, which rely on an SQLite database.
 You have to execute the script `/examples/create-tbl.php` to create the SQLite
-database in the `/assets` folder and import all certificates of the EUTL dump
+database in the `/assets` folder and import all certificates of the EUTL and AATL
 into it. The script will also write a timestamp into the file 
 `/assets/version.data` which is later used by all examples as its trust list
 version identification.
