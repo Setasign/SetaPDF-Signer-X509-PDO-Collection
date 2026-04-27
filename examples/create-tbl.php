@@ -1,14 +1,18 @@
 <?php
 
+use GuzzleHttp\Client;
 use setasign\SetaPDF2\Signer\PemHelper;
 use setasign\SetaPDF2\Signer\X509\Certificate;
 use setasign\SetaPDF2\Demos\Signer\X509\Collection\PdoCollection;
+use setasign\SetaPDF2\Signer\X509\Collection;
+use setasign\TrustListFetcher\Aatl;
+use setasign\TrustListFetcher\Eutl;
 
 $start = microtime(true);
 
 require_once '../vendor/autoload.php';
 
-$path = 'sqlite:../assets/eutl-2026-02-05.sqlite';
+$path = 'sqlite:../assets/eutl+aatl.sqlite';
 $dbh  = new PDO($path);
 
 $query[] = <<<SQL
@@ -64,18 +68,74 @@ $collection = new PdoCollection($dbh, $version);
 var_dump($collection->count());
 //die();
 
-//$tmpCollection = new \setasign\SetaPDF2\Signer\X509\Collection();
+// AATL
+$trustedCerts = new Collection();
+$trustedCerts->addFromFile(__DIR__ . '/../vendor/setasign/trust-list-fetcher/assets/Adobe Root CA G2.cer');
+$trustedCerts->addFromFile(__DIR__ . '/../vendor/setasign/trust-list-fetcher/assets/DigiCert Trusted Root G4.cer');
 
-foreach (PemHelper::extractFromFile('../assets/eutl-2026-02-05.pem') as $key => $value) {
-    try {
-        $cert = new Certificate($value);
-        $collection->add($cert);
-//        $tmpCollection->add($cert);
+$client = new Client([
+    'verify' => __DIR__ . '/../vendor/setasign/trust-list-fetcher/assets/cacert-2026-04-16+interm-for-IE.pem'
+]);
 
-    } catch (Exception $e) {
-        echo $e->getMessage();
-    }
+$start = microtime(true);
+
+$aatlFetcher = new Aatl($client, $trustedCerts);
+$aatlFetcher->getLogger()->setDirectOutput(true);
+
+$passed = $faulty = 0;
+try {
+    $aatlFetcher->fetch(
+        function (Certificate $certificate) use (&$collection, &$passed) {
+            $collection->add($certificate);
+            $passed++;
+        },
+
+        function (\InvalidArgumentException $e, string $certificate) use (&$faulty) {
+            $faulty++;
+            var_dump('ERROR', $e->getMessage(), $certificate);
+        }
+    );
+
+    var_dump($passed, $faulty);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+
+    $dbh->prepare('DELETE FROM certificates WHERE tlVersion = ?')
+        ->execute([$version]);
+    die();
 }
+
+
+// EUTL
+$trustedCerts = new Collection();
+$trustedCerts->add(PemHelper::extractFromFile(__DIR__ . '/../vendor/setasign/trust-list-fetcher/assets/LOTL-signing-certificates-2026-04-15.pem'));
+
+$eutlFetcher = new Eutl($client, $trustedCerts);
+$eutlFetcher->getLogger()->setDirectOutput(true);
+
+$passed = $faulty = 0;
+try {
+    $eutlFetcher->fetch(
+        function (Certificate $certificate) use (&$collection, &$passed) {
+            $collection->add($certificate);
+            $passed++;
+        },
+
+        function (\InvalidArgumentException $e, string $certificate) use (&$faulty) {
+            $faulty++;
+            var_dump('ERROR', $e->getMessage(), $certificate);
+        }
+    );
+
+    var_dump($passed, $faulty);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+
+    $dbh->prepare('DELETE FROM certificates WHERE tlVersion = ?')
+        ->execute([$version]);
+    die();
+}
+
 
 file_put_contents('../assets/version.data', $version);
 
