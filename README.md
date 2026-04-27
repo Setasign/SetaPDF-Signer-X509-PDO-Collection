@@ -18,18 +18,18 @@ Please make sure, that you implement your own update mechanism to keep the list 
 The implementation is technically independent to a database backend. It only requires a table 
 with following columns, types and indexes:
 
-| Column               | Type          | Index / PK            | Info                                                                              |
-|----------------------|---------------|-----------------------|-----------------------------------------------------------------------------------|
-| tlVersion            | varchar(400)  | PK (version + digest) | A trust list version identifiaction                                               | 
-| digest               | char(20)      | PK (version + digest) | The hash (SHA-1) of the certificate                                               |
-| keyHash              | char(20)      | Index                 | The hash (SHA-1) of the public key                                                |
-| subject              | varchar(400)  | Index                 | Longest subject in the EUTL is actually 274 bytes long.                           |
-| issuer               | varchar(400)  | Index                 | Longest issuer in the EUTL is actually 244 bytes long.                            |
-| validFrom            | uint(11)      |                       | A unix timestamp                                                                  |
-| validTo              | uint(11)      |                       | A unix timestamp                                                                  |
-| serialNumber         | varchar(42)   |                       | Hexadecimal string                                                                |
-| subjectKeyIdentifier | varchar(64)   | Index                 | Hexadecimal string                                                                |
-| certificate          | varchar(6000) |                       | The PEM encoded certificate (Largest certificate in the EUTL is e.g. 4381 bytes). |
+| Column               | Type          | Index / PK               | Info                                                                              |
+|----------------------|---------------|--------------------------|-----------------------------------------------------------------------------------|
+| tlVersion            | varchar(400)  | PK (tlVersion + digest)  | A trust list version identifiaction                                               | 
+| digest               | char(20)      | PK (tlVersion + digest)  | The hash (SHA-1) of the certificate                                               |
+| keyHash              | char(20)      | Index                    | The hash (SHA-1) of the public key                                                |
+| subject              | varchar(400)  | Index                    | Longest subject in the EUTL is actually 274 bytes long.                           |
+| issuer               | varchar(400)  | Index                    | Longest issuer in the EUTL is actually 244 bytes long.                            |
+| validFrom            | uint(11)      |                          | A unix timestamp                                                                  |
+| validTo              | uint(11)      |                          | A unix timestamp                                                                  |
+| serialNumber         | varchar(42)   |                          | Hexadecimal string                                                                |
+| subjectKeyIdentifier | varchar(64)   | Index                    | Hexadecimal string                                                                |
+| certificate          | varchar(6000) |                          | The PEM encoded certificate (Largest certificate in the EUTL is e.g. 4381 bytes). |
 
 We use SQLite for testing purpose. You can find the script that creates the table [here](examples/create-tbl.php) and fills it with 
 certificates of the EUTL.
