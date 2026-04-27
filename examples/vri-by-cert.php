@@ -8,7 +8,7 @@ $start = microtime(true);
 
 require_once '../vendor/autoload.php';
 
-$path = 'sqlite:../assets/eutl-2026-02-05.sqlite';
+$path = 'sqlite:../assets/eutl+aatl.sqlite';
 $version = file_get_contents('../assets/version.data');
 $dbh  = new PDO($path);
 $collection = new PdoCollection($dbh, $version);

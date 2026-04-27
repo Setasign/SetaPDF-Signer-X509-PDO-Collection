@@ -8,7 +8,7 @@ $start = microtime(true);
 
 require_once '../vendor/autoload.php';
 
-$path = 'sqlite:../assets/eutl-2026-02-05.sqlite';
+$path = 'sqlite:../assets/eutl+aatl.sqlite';
 $version = file_get_contents('../assets/version.data');
 $dbh  = new PDO($path);
 
@@ -77,7 +77,7 @@ var_dump($subCollection->count() === 4);
 //}
 
 $subCollection = $collection->findByIssuer('/C=RO/O=ALFATRUST CERTIFICATION', false);
-var_dump($subCollection->count() === 9);
+var_dump($subCollection->count() === 10);
 //foreach ($subCollection->getAll() as $item) {
 //    var_dump($item->getIssuerName());
 //}
@@ -85,7 +85,7 @@ var_dump($subCollection->count() === 9);
 // findByValidAt
 $now = new DateTime('2002-03-16 00:01:00');
 $validAt = $collection->findByValidAt($now);
-var_dump($validAt->count() == 84);
+var_dump($validAt->count() == 87);
 //foreach ($subCollection->getAll() as $item) {
 //    var_dump($item->getIssuerName());
 //}
