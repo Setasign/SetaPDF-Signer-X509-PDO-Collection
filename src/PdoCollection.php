@@ -226,7 +226,7 @@ class PdoCollection implements
     public function remove(Certificate $certificate): void
     {
         $this->pdo->prepare('DELETE FROM certificates WHERE tlVersion = ? AND digest = ?')
-            ->execute([$certificate->getDigest(), $this->tlVersion]);
+            ->execute([$this->tlVersion, $certificate->getDigest()]);
 
         $this->containsCache = [];
     }
