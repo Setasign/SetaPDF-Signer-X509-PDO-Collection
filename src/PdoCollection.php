@@ -190,7 +190,7 @@ class PdoCollection implements
         return (int)$stm->fetchColumn();
     }
 
-    public function add(Certificate $certificate)
+    public function add(Certificate $certificate, $origin = '')
     {
         $keyIdentifier = '';
         $extension = $certificate->getExtensions()->get(SubjectKeyIdentifier::OID);
@@ -209,15 +209,16 @@ class PdoCollection implements
             'serialNumber' => $certificate->getSerialNumber(),
             'subjectKeyIdentifier' => $keyIdentifier,
             'certificate' => $certificate->get(),
+            'origin' => $origin,
         ];
 
         $this->remove($certificate);
 
         $stm = $this->pdo->prepare(<<<SQL
             INSERT INTO certificates 
-                (tlVersion, digest, keyHash, subject, issuer, validFrom, validTo, serialNumber, subjectKeyIdentifier, certificate)
+                (tlVersion, digest, keyHash, subject, issuer, validFrom, validTo, serialNumber, subjectKeyIdentifier, certificate, origin)
             VALUES
-                (:tlVersion, :digest, :keyHash, :subject, :issuer, :validFrom, :validTo, :serialNumber, :subjectKeyIdentifier, :certificate)
+                (:tlVersion, :digest, :keyHash, :subject, :issuer, :validFrom, :validTo, :serialNumber, :subjectKeyIdentifier, :certificate, :origin)
         SQL);
 
         $stm->execute($data);
@@ -237,5 +238,16 @@ class PdoCollection implements
             ->execute([$this->tlVersion]);
 
         $this->containsCache = [];
+    }
+
+    public function getOrigin(Certificate $certificate): string
+    {
+        $digest = $certificate->getDigest();
+        $stm = $this->pdo->prepare('SELECT origin FROM certificates WHERE tlVersion = ? AND digest = ?');
+        if ($stm->execute([$this->tlVersion, $digest]) === false) {
+            return false;
+        }
+
+        return $stm->fetchColumn();
     }
 }
