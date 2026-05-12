@@ -54,6 +54,9 @@ var_dump($collection->count());
 
 var_dump($collection->contains($certificate) === true);
 
+var_dump($collection->getOrigin($certificate));
+var_dump($collection->getOrigin($certificate) === 'eutl');
+
 var_dump($collection->getBySerialNumber($certificate->getSerialNumber())->getSubjectName() === $certificate->getSubjectName());
 
 $keyIdentifier = $certificate->getExtensions()->get(SubjectKeyIdentifier::OID)->getKeyIdentifier();
