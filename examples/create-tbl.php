@@ -6,7 +6,7 @@ use setasign\SetaPDF2\Signer\X509\Certificate;
 use setasign\SetaPDF2\Demos\Signer\X509\Collection\PdoCollection;
 use setasign\SetaPDF2\Signer\X509\Collection;
 use setasign\TrustListFetcher\Aatl;
-use setasign\TrustListFetcher\Eutl;
+use setasign\TrustListFetcher\EtsiTL;
 
 $start = microtime(true);
 
@@ -28,6 +28,7 @@ create table if not exists certificates
     serialNumber         TEXT,
     subjectKeyIdentifier TEXT,
     certificate          TEXT,
+    origin               TEXT,
     constraint certificates_pk
         primary key (digest, tlVersion)
 );
@@ -86,7 +87,7 @@ $passed = $faulty = 0;
 try {
     $aatlFetcher->fetch(
         function (Certificate $certificate) use (&$collection, &$passed) {
-            $collection->add($certificate);
+            $collection->add($certificate, 'aatl');
             $passed++;
         },
 
@@ -110,14 +111,14 @@ try {
 $trustedCerts = new Collection();
 $trustedCerts->add(PemHelper::extractFromFile(__DIR__ . '/../vendor/setasign/trust-list-fetcher/assets/LOTL-signing-certificates-2026-04-15.pem'));
 
-$eutlFetcher = new Eutl($client, $trustedCerts);
+$eutlFetcher = new EtsiTL($client, $trustedCerts, 'https://ec.europa.eu/tools/lotl/eu-lotl.xml');
 $eutlFetcher->getLogger()->setDirectOutput(true);
 
 $passed = $faulty = 0;
 try {
     $eutlFetcher->fetch(
         function (Certificate $certificate) use (&$collection, &$passed) {
-            $collection->add($certificate);
+            $collection->add($certificate, 'eutl');
             $passed++;
         },
 
@@ -136,6 +137,35 @@ try {
     die();
 }
 
+// Swiss Trust List
+$trustedCerts = new Collection();
+$trustedCerts->add(PemHelper::extractFromFile(__DIR__ . '/../vendor/setasign/trust-list-fetcher/assets/CH-TL-cert-B64.cer'));
+
+$eutlFetcher = new EtsiTL($client, $trustedCerts, 'https://trustedlist.tsl-switzerland.ch/tsl-ch.xml');
+$eutlFetcher->getLogger()->setDirectOutput(true);
+
+$passed = $faulty = 0;
+try {
+    $eutlFetcher->fetch(
+        function (Certificate $certificate) use (&$collection, &$passed) {
+            $collection->add($certificate, 'chtl');
+            $passed++;
+        },
+
+        function (\InvalidArgumentException $e, string $certificate) use (&$faulty) {
+            $faulty++;
+            var_dump('ERROR', $e->getMessage(), $certificate);
+        }
+    );
+
+    var_dump($passed, $faulty);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+
+    $dbh->prepare('DELETE FROM certificates WHERE tlVersion = ?')
+        ->execute([$version]);
+    die();
+}
 
 file_put_contents('../assets/version.data', $version);
 

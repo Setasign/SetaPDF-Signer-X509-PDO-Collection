@@ -9,7 +9,7 @@ and `X509\Collection\FindByKeyHashInterface`.
 This implementation shows how you can use a database as a source of e.g. trusted certificates
 for the `ValidationRelatedInfo\Collector` class.
 
-For testing we use the certificate of the EUTL and AATL. The trust lists are resolved by
+For testing we use the certificate of the EUTL, Swiss Trust List and AATL. The trust lists are resolved by
 the [`setasign/trust-list-fetcher`](https://packagist.org/packages/setasign/trust-list-fetcher) project.
 
 Please make sure, that you implement your own update mechanism to keep the list up-to-date!
@@ -30,6 +30,7 @@ with following columns, types and indexes:
 | serialNumber         | varchar(42)   |                          | Hexadecimal string                                                                |
 | subjectKeyIdentifier | varchar(64)   | Index                    | Hexadecimal string                                                                |
 | certificate          | varchar(6000) |                          | The PEM encoded certificate (Largest certificate in the EUTL is e.g. 4381 bytes). |
+| origin               | varchar(10)   |                          | An unique identification of the origin.                                           |
 
 We use SQLite for testing purpose. You can find the script that creates the table [here](examples/create-tbl.php) and fills it with 
 certificates of the EUTL.
